@@ -257,7 +257,7 @@ namespace zra {
 
   void DecompressRA(const BufferView& input, const BufferView& output, size_t offset, size_t size) {
     Header header(input);
-    if (offset + size >= header.uncompressedSize)
+    if (offset + size > header.uncompressedSize)
       throw Exception(StatusCode::OutOfBoundsAccess);
     if (output.size < size)
       throw Exception(StatusCode::OutputBufferTooSmall);
@@ -266,7 +266,7 @@ namespace zra {
     auto frameSize = std::lldiv(static_cast<size_t>(frameOffset.rem + size), header.frameSize);
     auto firstFrame = reinterpret_cast<const Entry*>(input.data + header.seekTableOffset) + frameOffset.quot;
     auto lastFrame = firstFrame + (frameSize.quot + (frameSize.rem ? 1 : 0));
-    size_t compressedSize{*lastFrame - *firstFrame};
+    size_t compressedSize{static_cast<size_t>(*lastFrame - *firstFrame)};
 
     ZDCtx ctx;
 
@@ -377,7 +377,7 @@ namespace zra {
     auto lastFrame = firstFrame + (frameSize.quot + (frameSize.rem ? 1 : 0));
 
     auto initialOffset = *firstFrame;
-    size_t compressedSize{*lastFrame - *firstFrame};
+    size_t compressedSize{static_cast<size_t>(*lastFrame - *firstFrame)};
 
     std::optional<Buffer> inputBuffer;
     if (compressedSize > maxCacheSize)
